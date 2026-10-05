@@ -25,6 +25,7 @@ services:
 
 
   kafka:
+
     image: apache/kafka:4.2.2
     container_name: food_delivery_kafka
     restart: unless-stopped
@@ -62,6 +63,128 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+  customer-service:
+    build: ./services/customer-service
+    container_name: customer_service
+    restart: unless-stopped
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  restaurant-service:
+    build: ./services/restaurant-service
+    container_name: restaurant_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+      BAL_CONFIG_VAR_KAFKABOOTSTRAPSERVERS: kafka:29092
+
+    ports:
+      - "8082:8082"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+
+  order-service:
+    build: ./services/order-service
+    container_name: order_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+      BAL_CONFIG_VAR_KAFKABOOTSTRAPSERVERS: kafka:29092
+
+    ports:
+      - "8083:8083"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+      BAL_CONFIG_VAR_KAFKABOOTSTRAPSERVERS: kafka:29092
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+
+  delivery-service:
+    build: ./services/delivery-service
+    container_name: delivery_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+      BAL_CONFIG_VAR_KAFKABOOTSTRAPSERVERS: kafka:29092
+
+    ports:
+      - "8085:8085"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+      BAL_CONFIG_VAR_KAFKABOOTSTRAPSERVERS: kafka:29092
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+
+  admin-service:
+    build: ./services/admin-service
+    container_name: admin_service
+    restart: unless-stopped
+
+    environment:
+      BAL_CONFIG_VAR_DBHOST: mysql
+      BAL_CONFIG_VAR_DBPORT: 3306
+
+    ports:
+      - "8087:8087"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 volumes:
   mysql_data:
