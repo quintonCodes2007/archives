@@ -210,6 +210,14 @@ function processOrderStatusEvent(
 
     transaction {
 
+        // Serialize attempts for the same order, including the waiting-queue
+        // retry. The existing driver lock and version check remain below.
+        record {| string status; |} lockedOrder = check dbClient->queryRow(
+            `SELECT status FROM orders WHERE id = ${orderEvent.orderId} FOR UPDATE`);
+        if lockedOrder.status != "READY" {
+            fail error("ORDER_NO_LONGER_READY");
+        }
+
         DriverData|error driverResult = dbClient->queryRow(
             `SELECT
                 id,
@@ -490,6 +498,43 @@ service on deliveryListener {
 // =====================================================
 
 service /deliveries on new http:Listener(8085) {
+
+    resource function get .() returns DeliveryDetails[]|error {
+        return check readDeliveries();
+    }
+
+    resource function get waiting() returns WaitingDelivery[]|error {
+        return check readWaitingDeliveries();
+    }
+
+    resource function get drivers() returns DriverProfile[]|error {
+        stream<DriverProfile, error?> rows = dbClient->query(
+            `SELECT id, full_name AS fullName, email, phone, status FROM drivers ORDER BY id`);
+        DriverProfile[] results = [];
+        check from DriverProfile row in rows do { results.push(row); };
+        return results;
+    }
+
+    resource function post drivers(@http:Payload CreateDriverRequest request)
+            returns json|http:BadRequest|http:Conflict|error {
+        if request.fullName.trim().length() == 0 || request.fullName.length() > 100 ||
+                request.email.trim().length() == 0 || request.email.length() > 255 ||
+                request.phone.trim().length() == 0 || request.phone.length() > 30 {
+            return <http:BadRequest>{body: {message: "Name, email and phone are required and must fit the driver profile"}};
+        }
+        var result = dbClient->execute(
+            `INSERT INTO drivers (full_name, email, phone, status)
+             VALUES (${request.fullName.trim()}, ${request.email.trim()}, ${request.phone.trim()}, 'AVAILABLE')`);
+        if result is error {
+            return <http:Conflict>{body: {message: "Could not create driver. Email and phone must be unique."}};
+        }
+        int|string? id = result.lastInsertId;
+        if id is int {
+            return {id: id, fullName: request.fullName.trim(), email: request.email.trim(),
+                phone: request.phone.trim(), status: "AVAILABLE"};
+        }
+        return error("Invalid generated driver ID");
+    }
 
     // -------------------------------------------------
     // HEALTH

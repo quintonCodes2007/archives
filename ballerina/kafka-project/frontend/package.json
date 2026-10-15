@@ -1,19 +1,23 @@
 {
-  "name": "food-delivery-control-desk",
+  "name": "foodlane",
   "private": true,
   "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@vitejs/plugin-react": "^5.0.4",
+    "prettier": "^3.9.10",
     "vite": "^7.1.7"
   }
 }

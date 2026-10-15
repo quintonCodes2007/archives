@@ -1,8 +1,8 @@
 import ballerina/http;
 import ballerina/io;
+import ballerina/sql;
 import ballerina/uuid;
 import ballerinax/kafka;
-import ballerina/sql;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 
@@ -19,7 +19,6 @@ final mysql:Client dbClient = check new (
 );
 
 final kafka:Producer kafkaProducer = check new (kafkaBootstrapServers);
-
 
 // =====================================================
 // TYPES
@@ -70,7 +69,6 @@ type OrderStatusEvent readonly & record {|
     string newStatus;
 |};
 
-
 // =====================================================
 // PUBLISH ORDER STATUS EVENT
 // =====================================================
@@ -99,15 +97,14 @@ function publishOrderStatusEvent(
     });
 
     io:println(
-        "Published order status event: order ",
-        orderId,
-        " ",
-        oldStatus,
-        " -> ",
-        newStatus
+            "Published order status event: order ",
+            orderId,
+            " ",
+            oldStatus,
+            " -> ",
+            newStatus
     );
 }
-
 
 // =====================================================
 // ORDER STATUS TRANSACTION
@@ -163,45 +160,94 @@ function updateOrderStatusTransactional(
     }
 }
 
-
 // =====================================================
 // RESTAURANT HTTP SERVICE
 // =====================================================
 
 service /restaurants on new http:Listener(8082) {
 
+    resource function get .() returns Restaurant[]|error {
+        return check readRestaurants();
+    }
+
+    resource function post .(@http:Payload CreateRestaurantRequest request)
+            returns json|http:BadRequest|http:Conflict|error {
+        if request.name.trim().length() == 0 || request.name.length() > 150 ||
+                request.address.trim().length() == 0 || request.address.length() > 255 {
+            return <http:BadRequest>{body: {message: "Name (max 150) and address (max 255) are required"}};
+        }
+        var result = dbClient->execute(
+            `INSERT INTO restaurants (name, address, email, phone)
+             VALUES (${request.name.trim()}, ${request.address.trim()}, ${request.email}, ${request.phone})`);
+        if result is error {
+            return <http:Conflict>{body: {message: "Could not create restaurant. Check unique email and phone."}};
+        }
+        int|string? id = result.lastInsertId;
+        if id is int {
+            return {id: id, name: request.name.trim(), address: request.address.trim(), active: true};
+        }
+        return error("Invalid generated restaurant ID");
+    }
+
+    resource function post [int restaurantId]/menu(@http:Payload CreateMenuItemRequest request)
+            returns json|http:BadRequest|http:NotFound|http:Conflict|error {
+        if request.name.trim().length() == 0 || request.name.length() > 150 ||
+                request.description.length() > 500 || request.price < 0.0d ||
+                request.price > 99999999.99d || request.stockQuantity < 0 {
+            return <http:BadRequest>{body: {message: "Provide a name, description up to 500 characters, non-negative price and stock"}};
+        }
+        int count = check dbClient->queryRow(`SELECT COUNT(*) FROM restaurants WHERE id = ${restaurantId}`);
+        if count == 0 {
+            return <http:NotFound>{body: {message: "Restaurant not found"}};
+        }
+        var result = dbClient->execute(
+            `INSERT INTO menu_items (restaurant_id, name, description, price, stock_quantity, available)
+             VALUES (${restaurantId}, ${request.name.trim()}, ${request.description},
+                ${request.price}, ${request.stockQuantity}, TRUE)`);
+        if result is error {
+            return <http:Conflict>{body: {message: "Could not add menu item. This restaurant may already have an item with that name."}};
+        }
+        int|string? id = result.lastInsertId;
+        if id is int {
+            return {id: id, restaurantId: restaurantId, name: request.name.trim(),
+                description: request.description, price: request.price,
+                stockQuantity: request.stockQuantity, available: true};
+        }
+        return error("Invalid generated menu item ID");
+    }
+
     resource function get [int restaurantId]/hours()
         returns json|
             http:NotFound|
             http:InternalServerError {
 
-    int|error restaurantCount = dbClient->queryRow(
+        int|error restaurantCount = dbClient->queryRow(
         `SELECT COUNT(*)
          FROM restaurants
          WHERE id = ${restaurantId}`
-    );
+        );
 
-    if restaurantCount is error {
-        http:InternalServerError response = {
-            body: {
-                message: "Failed to validate restaurant"
-            }
-        };
+        if restaurantCount is error {
+            http:InternalServerError response = {
+                body: {
+                    message: "Failed to validate restaurant"
+                }
+            };
 
-        return response;
-    }
+            return response;
+        }
 
-    if restaurantCount == 0 {
-        http:NotFound response = {
-            body: {
-                message: "Restaurant not found"
-            }
-        };
+        if restaurantCount == 0 {
+            http:NotFound response = {
+                body: {
+                    message: "Restaurant not found"
+                }
+            };
 
-        return response;
-    }
+            return response;
+        }
 
-    stream<RestaurantHoursRow, sql:Error?> hoursStream =
+        stream<RestaurantHoursRow, sql:Error?> hoursStream =
         dbClient->query(
             `SELECT
                 day_of_week AS dayOfWeek,
@@ -214,96 +260,97 @@ service /restaurants on new http:Listener(8082) {
             RestaurantHoursRow
         );
 
-    RestaurantHoursRow[] hours = [];
+        RestaurantHoursRow[] hours = [];
 
-    error? streamResult = hoursStream.forEach(
+        error? streamResult = hoursStream.forEach(
         function(RestaurantHoursRow row) {
             hours.push(row);
         }
-    );
+        );
 
-    if streamResult is error {
-        http:InternalServerError response = {
-            body: {
-                message: "Failed to retrieve restaurant opening hours"
-            }
-        };
-
-        return response;
-    }
-
-    return {
-        restaurantId: restaurantId,
-        hours: hours
-    };
-}
-    resource function put [int restaurantId]/hours/[int dayOfWeek](
-        @http:Payload OpeningHoursRequest hoursRequest)
-        returns json|
-            http:BadRequest|
-            http:NotFound|
-            http:InternalServerError {
-
-    if dayOfWeek < 0 || dayOfWeek > 6 {
-        http:BadRequest response = {
-            body: {
-                message: "dayOfWeek must be between 0 and 6"
-            }
-        };
-
-        return response;
-    }
-
-    if !hoursRequest.closed {
-        if hoursRequest.openTime.trim().length() == 0 ||
-                hoursRequest.closeTime.trim().length() == 0 {
-
-            http:BadRequest response = {
+        if streamResult is error {
+            http:InternalServerError response = {
                 body: {
-                    message:
-                        "openTime and closeTime are required when the restaurant is open"
+                    message: "Failed to retrieve restaurant opening hours"
                 }
             };
 
             return response;
         }
+
+        return {
+            restaurantId: restaurantId,
+            hours: hours
+        };
     }
 
-    int|error restaurantCount = dbClient->queryRow(
+    resource function put [int restaurantId]/hours/[int dayOfWeek](
+            @http:Payload OpeningHoursRequest hoursRequest)
+        returns json|
+            http:BadRequest|
+            http:NotFound|
+            http:InternalServerError {
+
+        if dayOfWeek < 0 || dayOfWeek > 6 {
+            http:BadRequest response = {
+                body: {
+                    message: "dayOfWeek must be between 0 and 6"
+                }
+            };
+
+            return response;
+        }
+
+        if !hoursRequest.closed {
+            if hoursRequest.openTime.trim().length() == 0 ||
+                hoursRequest.closeTime.trim().length() == 0 {
+
+                http:BadRequest response = {
+                    body: {
+                        message:
+                        "openTime and closeTime are required when the restaurant is open"
+                    }
+                };
+
+                return response;
+            }
+        }
+
+        int|error restaurantCount = dbClient->queryRow(
         `SELECT COUNT(*)
          FROM restaurants
          WHERE id = ${restaurantId}`
-    );
+        );
 
-    if restaurantCount is error {
-        http:InternalServerError response = {
-            body: {
-                message: "Failed to validate restaurant"
-            }
-        };
+        if restaurantCount is error {
+            http:InternalServerError response = {
+                body: {
+                    message: "Failed to validate restaurant"
+                }
+            };
 
-        return response;
-    }
+            return response;
+        }
 
-    if restaurantCount == 0 {
-        http:NotFound response = {
-            body: {
-                message: "Restaurant not found"
-            }
-        };
+        if restaurantCount == 0 {
+            http:NotFound response = {
+                body: {
+                    message: "Restaurant not found"
+                }
+            };
 
-        return response;
-    }
+            return response;
+        }
 
-    string? openTime = hoursRequest.closed
-        ? ()
-        : hoursRequest.openTime;
+        string? openTime = hoursRequest.closed
+            ? ()
+            : hoursRequest.openTime;
 
-    string? closeTime = hoursRequest.closed
-        ? ()
-        : hoursRequest.closeTime;
+        string? closeTime = hoursRequest.closed
+            ? ()
+            : hoursRequest.closeTime;
 
-    var updateResult = dbClient->execute(
+        var updateResult = dbClient->execute(
         `INSERT INTO restaurant_hours
             (
                 restaurant_id,
@@ -324,27 +371,27 @@ service /restaurants on new http:Listener(8082) {
             open_time = ${openTime},
             close_time = ${closeTime},
             closed = ${hoursRequest.closed}`
-    );
+        );
 
-    if updateResult is error {
-        http:InternalServerError response = {
-            body: {
-                message: "Failed to update restaurant opening hours"
-            }
+        if updateResult is error {
+            http:InternalServerError response = {
+                body: {
+                    message: "Failed to update restaurant opening hours"
+                }
+            };
+
+            return response;
+        }
+
+        return {
+            restaurantId: restaurantId,
+            dayOfWeek: dayOfWeek,
+            openTime: openTime,
+            closeTime: closeTime,
+            closed: hoursRequest.closed,
+            message: "Restaurant opening hours updated"
         };
-
-        return response;
     }
-
-    return {
-        restaurantId: restaurantId,
-        dayOfWeek: dayOfWeek,
-        openTime: openTime,
-        closeTime: closeTime,
-        closed: hoursRequest.closed,
-        message: "Restaurant opening hours updated"
-    };
-}
 
     // -------------------------------------------------
     // HEALTH
@@ -357,7 +404,6 @@ service /restaurants on new http:Listener(8082) {
             "status": "UP"
         };
     }
-
 
     // -------------------------------------------------
     // GET RESTAURANT MENU
@@ -421,7 +467,6 @@ service /restaurants on new http:Listener(8082) {
 
         return menuItems;
     }
-
 
     // -------------------------------------------------
     // UPDATE INVENTORY
@@ -500,7 +545,6 @@ service /restaurants on new http:Listener(8082) {
             available: inventoryRequest.available
         };
     }
-
 
     // -------------------------------------------------
     // CONFIRMED -> PREPARING
@@ -593,7 +637,6 @@ service /restaurants on new http:Listener(8082) {
             status: "PREPARING"
         };
     }
-
 
     // -------------------------------------------------
     // PREPARING -> READY

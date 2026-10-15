@@ -1,5 +1,7 @@
 # Distributed Food Delivery Platform
 
+The redesigned Foodlane UI is documented in [frontend/README.md](../frontend/README.md), with an API-only demo setup in [DEMO-DATA.md](../DEMO-DATA.md). The inspection, added REST resources and validation record are in [FRONTEND-IMPLEMENTATION.md](FRONTEND-IMPLEMENTATION.md). The assignment architecture below is retained.
+
 ## Overview
 
 This project is a distributed food delivery platform developed for **DSA612S – Distributed Systems and Applications**.
@@ -19,7 +21,7 @@ The platform separates the major business functions of a food delivery system in
 
 ### System Architecture Diagram
 
-![Distributed Food Delivery Platform Architecture](docs/architecture.png)
+![Distributed Food Delivery Platform Architecture](./architecture.png)
 
 The architecture consists of seven Ballerina microservices connected through Apache Kafka and a shared MySQL persistence layer.
 

@@ -175,6 +175,20 @@ function addAddressTransactional(
 
 service /customers on new http:Listener(8081) {
 
+    // Demo identity lookup only: the assignment schema has no credentials.
+    resource function get lookup(string email)
+            returns Customer|http:NotFound|error {
+        int count = check dbClient->queryRow(
+            `SELECT COUNT(*) FROM customers WHERE email = ${email.trim()}`);
+        if count == 0 {
+            return <http:NotFound>{body: {message: "No account with that email. Create an account first."}};
+        }
+        Customer customer = check dbClient->queryRow(
+            `SELECT id, username, full_name AS fullName, email, phone
+             FROM customers WHERE email = ${email.trim()}`);
+        return customer;
+    }
+
     // -------------------------------------------------
     // HEALTH
     // -------------------------------------------------

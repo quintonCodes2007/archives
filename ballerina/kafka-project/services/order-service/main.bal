@@ -631,6 +631,14 @@ function processDeliveryEvent(DeliveryEvent deliveryEvent)
 
 service /orders on new http:Listener(8083) {
 
+    resource function get .(int restaurantId = 0, int customerId = 0)
+            returns OrderDetails[]|http:BadRequest|error {
+        if restaurantId < 0 || customerId < 0 {
+            return <http:BadRequest>{body: {message: "Filters must be non-negative IDs"}};
+        }
+        return check readOrders(restaurantId, customerId);
+    }
+
 
 
     resource function get health() returns json {

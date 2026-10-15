@@ -1,0 +1,637 @@
+@media (min-width: 1550px) {
+  .ordering-layout {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
+  .menu-art .food-art {
+    height: 200px;
+  }
+  .menu-grid {
+    gap: 22px;
+  }
+}
+@media (max-width: 1280px) {
+  .sidebar {
+    width: 190px;
+    flex-basis: 190px;
+    padding-inline: 14px;
+  }
+  .sidebar .brand {
+    font-size: 21px;
+    margin-inline: 4px;
+  }
+  .page-content,
+  .topbar {
+    padding-inline: 24px;
+  }
+  .ordering-layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 19px;
+  }
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .restaurant-grid,
+  .delivery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kitchen-board {
+    gap: 12px;
+  }
+  .kitchen-ticket {
+    padding-inline: 12px;
+  }
+  .kitchen-ticket .row-between {
+    flex-wrap: wrap;
+  }
+  .stat {
+    padding: 17px;
+  }
+  .stat-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+  .stat-icon svg {
+    width: 19px;
+  }
+  .stat strong {
+    font-size: 25px;
+  }
+  .driver-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hours-row {
+    grid-template-columns: 1fr 70px 110px 15px 110px 60px;
+    gap: 10px;
+  }
+  .inventory-form {
+    gap: 11px;
+  }
+  .inventory-item {
+    padding-inline: 18px;
+    gap: 13px;
+  }
+}
+@media (max-width: 1020px) {
+  .sidebar {
+    width: 172px;
+    flex-basis: 172px;
+  }
+  .sidebar .brand {
+    font-size: 19px;
+    gap: 6px;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px 10px 10px 3px;
+  }
+  .sidebar nav a {
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+  .sidebar-note {
+    padding: 14px 11px;
+  }
+  .page-header {
+    align-items: flex-start;
+  }
+  .page-header h1 {
+    font-size: 26px;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+  }
+  .stats-grid {
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stat strong {
+    font-size: 27px;
+  }
+  .ordering-layout {
+    grid-template-columns: minmax(0, 1fr) 255px;
+    gap: 15px;
+  }
+  .cart {
+    padding-inline: 15px;
+  }
+  .menu-grid {
+    gap: 12px;
+  }
+  .menu-art .food-art {
+    height: 130px;
+    min-height: 130px;
+  }
+  .menu-art .food-shape {
+    transform: scale(0.7) rotate(-8deg);
+  }
+  .menu-card-body h3 {
+    font-size: 12px;
+  }
+  .quantity-control button {
+    width: 22px;
+  }
+  .price {
+    font-size: 14px;
+  }
+  .discovery-banner > .food-art {
+    right: 4%;
+    width: 230px;
+  }
+  .banner-tag {
+    display: none;
+  }
+  .discovery-banner .food-shape {
+    transform: scale(1.2) rotate(-8deg);
+  }
+  .kitchen-board {
+    grid-template-columns: 1fr;
+  }
+  .queue-column {
+    min-height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+  .queue-heading {
+    grid-column: 1/-1;
+    margin-bottom: 2px;
+  }
+  .queue-column .empty {
+    padding: 25px;
+    grid-column: 1/-1;
+  }
+  .kitchen-ticket {
+    margin: 0;
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .inventory-item {
+    flex-wrap: wrap;
+  }
+  .inventory-form {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid #f5eef6;
+    padding-top: 12px;
+  }
+  .inventory-form .field {
+    flex-direction: row;
+    width: auto;
+    align-items: center;
+  }
+  .hours-row {
+    grid-template-columns: 1fr 65px 95px 10px 95px 55px;
+    gap: 8px;
+  }
+  .hours-panel {
+    padding: 18px;
+  }
+  .auth-panel {
+    padding-inline: 7%;
+  }
+  .auth-visual {
+    padding-inline: 25px;
+  }
+  .visual-caption h2 {
+    font-size: 45px;
+  }
+  .visual-kicker {
+    left: 25px;
+    letter-spacing: 1px;
+  }
+  .auth-collage {
+    grid-template-columns: 1fr;
+    top: 90px;
+    left: 25px;
+    width: 110%;
+  }
+  .auth-collage .collage-main {
+    min-height: 350px;
+  }
+  .auth-collage > :not(.collage-main) {
+    display: none;
+  }
+}
+@media (max-width: 780px) {
+  .app-shell {
+    display: block;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    width: 100%;
+    padding: 13px 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    overflow-x: auto;
+  }
+  .sidebar .brand {
+    font-size: 21px;
+    margin: 0 15px 0 0;
+    flex-shrink: 0;
+  }
+  .sidebar .brand i {
+    margin-bottom: 5px;
+  }
+  .nav-label,
+  .sidebar-note,
+  .ops-links {
+    display: none;
+  }
+  .sidebar nav {
+    display: flex;
+    gap: 3px;
+  }
+  .sidebar nav a {
+    padding: 9px 11px;
+    white-space: nowrap;
+    gap: 7px;
+    font-size: 10px;
+  }
+  .sidebar nav a.active::after {
+    display: none;
+  }
+  .sidebar nav svg {
+    width: 16px;
+  }
+  .sidebar-bottom {
+    margin: 0 0 0 auto;
+    padding: 0;
+  }
+  .logout-button {
+    padding: 5px;
+    font-size: 0;
+  }
+  .logout-button svg {
+    width: 19px;
+  }
+  .topbar {
+    height: 65px;
+    min-height: 65px;
+    padding-inline: 20px;
+  }
+  .page-content {
+    padding: 25px 20px;
+  }
+  .page-header {
+    margin-bottom: 23px;
+    gap: 15px;
+  }
+  .page-header h1 {
+    font-size: 25px;
+    letter-spacing: -0.7px;
+  }
+  .page-header .eyebrow {
+    font-size: 8px;
+  }
+  .page-header p {
+    font-size: 11px;
+  }
+  .header-actions .button {
+    min-height: 36px;
+    font-size: 10px;
+    padding: 9px 12px;
+  }
+  .app-footer {
+    padding-inline: 20px;
+  }
+  .ordering-layout {
+    grid-template-columns: minmax(0, 1fr) 265px;
+  }
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+  .auth-page {
+    padding: 12px;
+    grid-template-columns: 1.1fr 1fr;
+  }
+  .auth-panel {
+    padding-inline: 6%;
+  }
+  .auth-form-wrap h1 {
+    font-size: 31px;
+  }
+  .auth-visual {
+    min-height: 720px;
+    padding-inline: 18px;
+  }
+  .visual-caption h2 {
+    font-size: 39px;
+    letter-spacing: -1.5px;
+  }
+  .visual-kicker {
+    left: 19px;
+    font-size: 6px;
+  }
+  .visual-caption p {
+    font-size: 10px;
+  }
+  .auth-collage .collage-main .food-shape {
+    transform: scale(1.4) rotate(13deg);
+  }
+}
+@media (max-width: 620px) {
+  .sidebar {
+    padding-inline: 15px;
+    gap: 4px;
+  }
+  .sidebar .brand {
+    margin-right: 8px;
+    font-size: 19px;
+  }
+  .sidebar nav a {
+    padding: 9px;
+    font-size: 10px;
+  }
+  .sidebar nav svg {
+    display: none;
+  }
+  .sidebar .brand-mark svg {
+    display: block;
+  }
+  .topbar {
+    padding-inline: 16px;
+  }
+  .workspace-name {
+    font-size: 10px;
+    max-width: 135px;
+    line-height: 1.6;
+  }
+  .profile strong {
+    font-size: 10px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+  .profile {
+    gap: 8px;
+  }
+  .page-content {
+    padding: 23px 16px;
+  }
+  .page-header {
+    flex-wrap: wrap;
+  }
+  .header-actions {
+    justify-content: flex-start;
+  }
+  .live {
+    font-size: 9px;
+  }
+  .discovery-banner {
+    min-height: 190px;
+    padding: 22px;
+  }
+  .discovery-banner h2 {
+    font-size: 25px;
+  }
+  .discovery-banner p {
+    max-width: 165px;
+    font-size: 9px;
+  }
+  .discovery-banner > .food-art {
+    width: 135px;
+    right: 3%;
+  }
+  .discovery-banner .food-shape {
+    transform: scale(0.85) rotate(-12deg);
+  }
+  .discovery-banner .food-disc {
+    width: 145px;
+    height: 145px;
+  }
+  .discovery-banner .eyebrow {
+    font-size: 7px;
+  }
+  .section-toolbar {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .section-toolbar .search-field {
+    width: 100%;
+  }
+  .restaurant-grid {
+    grid-template-columns: 1fr;
+  }
+  .ordering-layout {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+  .menu-art .food-art {
+    height: 145px;
+  }
+  .cart {
+    position: static;
+    padding: 23px;
+  }
+  .cart-line {
+    grid-template-columns: 60px 1fr;
+  }
+  .cart-lines {
+    gap: 20px;
+  }
+  .cart-line strong {
+    font-size: 12px;
+  }
+  .cart-line-meta {
+    font-size: 11px;
+  }
+  .stats-grid,
+  .stats-grid.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+  .stat {
+    padding: 16px;
+    min-height: 110px;
+  }
+  .stat strong {
+    font-size: 25px;
+    margin-top: 16px;
+  }
+  .stat span:not(.stat-icon) {
+    font-size: 9px;
+  }
+  .stat-icon {
+    width: 25px;
+    height: 25px;
+  }
+  .stat-icon svg {
+    width: 15px;
+  }
+  .queue-column {
+    grid-template-columns: 1fr;
+  }
+  .queue-heading {
+    padding: 5px;
+  }
+  .kitchen-ticket {
+    padding: 18px;
+  }
+  .delivery-grid,
+  .driver-roster {
+    grid-template-columns: 1fr;
+  }
+  .map-panel {
+    padding: 18px 15px 10px;
+  }
+  .map-panel h2 {
+    font-size: 16px;
+  }
+  .map-label {
+    font-size: 7px;
+    padding: 5px;
+  }
+  .schematic-map {
+    height: 210px;
+  }
+  .map-marker {
+    width: 31px;
+    height: 31px;
+    border-radius: 9px;
+  }
+  .map-marker svg {
+    width: 18px;
+  }
+  .map-marker small {
+    top: 37px;
+    font-size: 7px;
+  }
+  .map-key {
+    font-size: 7px;
+  }
+  .map-caption {
+    flex-wrap: wrap;
+    font-size: 9px;
+  }
+  .delivery-actions .button {
+    font-size: 11px;
+  }
+  .order-card {
+    padding: 21px 17px;
+  }
+  .order-card h3 {
+    font-size: 16px;
+  }
+  .order-timeline {
+    flex-wrap: wrap;
+    row-gap: 18px;
+    padding: 18px 5px;
+  }
+  .order-timeline li {
+    flex-basis: 33%;
+    font-size: 8px;
+  }
+  .order-timeline li:nth-child(3)::after {
+    display: none;
+  }
+  .page-tabs {
+    gap: 20px;
+  }
+  .page-tabs button {
+    font-size: 11px;
+  }
+  .inventory-item {
+    padding: 17px;
+  }
+  .inventory-item > .food-art {
+    width: 65px;
+    height: 65px;
+    min-height: 65px;
+  }
+  .inventory-form {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .inventory-form .field {
+    gap: 10px;
+  }
+  .inventory-form input[type="number"] {
+    width: 65px;
+  }
+  .hours-panel {
+    padding: 20px 16px;
+  }
+  .hours-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+  }
+  .hours-row > span {
+    display: none;
+  }
+  .hours-row > .checkbox-field {
+    justify-self: end;
+  }
+  .hours-row > .button {
+    grid-column: span 2;
+    justify-self: end;
+    width: 80px;
+  }
+  .status-chart-row {
+    grid-template-columns: 105px 1fr 25px;
+    gap: 9px;
+    font-size: 9px;
+  }
+  .chart-panel {
+    padding: 20px;
+  }
+  .panel-heading {
+    padding-inline: 20px;
+  }
+  .panel-heading h2 {
+    font-size: 17px;
+  }
+  th,
+  td {
+    padding-inline: 18px;
+  }
+  .auth-page {
+    display: block;
+    padding: 0;
+  }
+  .auth-panel {
+    padding: 26px 27px 18px;
+    min-height: 100vh;
+  }
+  .auth-panel .brand {
+    margin: 0 0 35px;
+  }
+  .auth-form-wrap {
+    padding-top: 13px;
+    padding-bottom: 10px;
+    max-width: 360px;
+  }
+  .auth-form-wrap h1 {
+    font-size: 36px;
+  }
+  .auth-visual {
+    display: none;
+  }
+  .auth-footer {
+    margin-top: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
