@@ -36,9 +36,10 @@ export function Empty({ title, children, icon = "bag" }) {
 }
 export function PageHeader({ eyebrow, title, children, actions }) {
   return (
-    <header className="page-header">
-      <div>
-        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+    <header className="page-header night-section-header">
+      <div className="night-header-number" aria-hidden="true">N°</div>
+      <div className="night-header-copy">
+        {eyebrow && <div className="eyebrow"><span className="night-header-square" />{eyebrow}</div>}
         <h1>{title}</h1>
         {children && <p>{children}</p>}
       </div>

@@ -176,299 +176,37 @@ export default function OrderingPage() {
     }
   }
   return (
-    <>
-      <Link className="back-link" to="/restaurants">
-        ← All restaurants
-      </Link>
-      <PageHeader
-        eyebrow="FRESH FROM THE KITCHEN"
-        title={query.data?.restaurant.name || "Restaurant menu"}
-        actions={
-          state && (
-            <Badge status={state.open ? "AVAILABLE" : "OFFLINE"}>
-              {state.label}
-            </Badge>
-          )
-        }
-      >
-        {query.data?.restaurant.address || "Choose something delicious."}
-      </PageHeader>
+    <div className="night-order-page">
+      <Link className="back-link" to="/restaurants">← BACK TO ALL KITCHENS</Link>
+      <div className="order-showcase"><div className="order-showcase-photo"><FoodArt kind="burgerAlt"/></div><div className="order-showcase-content"><span className="eyebrow">THE KITCHEN / ORDER ONLINE</span><h1>{query.data?.restaurant.name || "Tonight's menu."}</h1><p><Icon name="pin" size={16}/>{query.data?.restaurant.address || "The freshest local food"}</p><div className="order-showcase-badges">{state && <Badge status={state.open ? "AVAILABLE" : "OFFLINE"}>{state.label}</Badge>}<span>FRESHLY PREPARED</span><span>MADE WITH ATTITUDE</span></div></div><div className="order-showcase-num">MENU<br/><strong>N° 01</strong></div></div>
       <DataState query={query}>
-        <div className="ordering-layout">
-          <section className="menu-area">
-            <div className="section-toolbar">
-              <div className="pill-tabs">
-                <button
-                  className={section === "all" ? "selected" : ""}
-                  onClick={() => setSection("all")}
-                >
-                  All items <span>{menu.length}</span>
-                </button>
-                <button
-                  className={section === "available" ? "selected" : ""}
-                  onClick={() => setSection("available")}
-                >
-                  Available now
-                </button>
-              </div>
-              <label className="search-field">
-                <Icon name="search" size={18} />
-                <input
-                  aria-label="Search menu"
-                  placeholder="Search something tasty…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </label>
-            </div>
-            {!visible.length ? (
-              <Empty
-                title={
-                  search ? "Nothing matches your craving" : "No menu items yet."
-                }
-              >
-                {search
-                  ? "Try another search."
-                  : "This restaurant is getting its menu ready."}
-              </Empty>
-            ) : (
-              <div className="menu-grid">
-                {visible.map((item) => {
-                  const unavailable =
-                    !item.available || item.stockQuantity <= 0;
-                  return (
-                    <article
-                      className={`menu-card ${unavailable ? "unavailable" : ""}`}
-                      key={item.id}
-                    >
-                      <div className="menu-art">
-                        <FoodArt name={item.name} />
-                        {unavailable && (
-                          <span className="sold-out">
-                            Currently unavailable
-                          </span>
-                        )}
-                      </div>
-                      <div className="menu-card-body">
-                        <h3>{item.name}</h3>
-                        <p>
-                          {item.description ||
-                            "Prepared fresh by your local kitchen."}
-                        </p>
-                        <div className="menu-stock">
-                          {unavailable
-                            ? "Back soon"
-                            : `${item.stockQuantity} available`}
-                        </div>
-                        <div className="row-between">
-                          <strong className="price">{money(item.price)}</strong>
-                          {cart[item.id] ? (
-                            <div className="quantity-control">
-                              <button
-                                aria-label={`Remove one ${item.name}`}
-                                onClick={() => quantity(item, -1)}
-                              >
-                                −
-                              </button>
-                              <span>{cart[item.id]}</span>
-                              <button
-                                aria-label={`Add one ${item.name}`}
-                                disabled={
-                                  cart[item.id] >= item.stockQuantity ||
-                                  unavailable
-                                }
-                                onClick={() => quantity(item, 1)}
-                              >
-                                +
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              className="add-button"
-                              disabled={unavailable || busy}
-                              aria-label={`Add ${item.name} to order`}
-                              onClick={() => quantity(item, 1)}
-                            >
-                              <Icon name="plus" size={18} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-          <aside className="cart panel">
-            <div className="row-between">
-              <h2>Your order</h2>
-              <span className="count-pill">
-                {lines.reduce((n, item) => n + item.quantity, 0)}
-              </span>
-            </div>
-            <p className="muted cart-subtitle">
-              A little something to look forward to.
-            </p>
-            {!lines.length ? (
-              <Empty title="Your bag is waiting">
-                Add a favourite from the menu to get started.
-              </Empty>
-            ) : (
-              <>
-                <div className="cart-lines">
-                  {lines.map((item) => (
-                    <div className="cart-line" key={item.id}>
-                      <FoodArt name={item.name} />
-                      <div>
-                        <strong>{item.name}</strong>
-                        <div className="cart-line-meta">
-                          <span>{money(item.price)}</span>
-                          <button
-                            aria-label={`Remove ${item.name} from order`}
-                            className="text-button"
-                            onClick={() =>
-                              setCart((current) => {
-                                const next = { ...current };
-                                delete next[item.id];
-                                return next;
-                              })
-                            }
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <div className="quantity-control">
-                          <button
-                            aria-label={`Decrease ${item.name}`}
-                            onClick={() => quantity(item, -1)}
-                          >
-                            −
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button
-                            aria-label={`Increase ${item.name}`}
-                            disabled={
-                              item.quantity >= item.stockQuantity ||
-                              !item.available
-                            }
-                            onClick={() => quantity(item, 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className="text-button muted"
-                  onClick={() => setCart({})}
-                >
-                  Clear order
-                </button>
-              </>
-            )}
-            <form onSubmit={checkout} className="cart-checkout">
-              <div className="row-between">
-                <h3>Deliver to</h3>
-                <button
-                  className="text-button"
-                  type="button"
-                  onClick={() => setAddressModal(true)}
-                >
-                  + Save address
-                </button>
-              </div>
-              {query.data?.addresses.length > 0 && (
-                <label className="field">
-                  <span>Saved addresses</span>
-                  <select
-                    aria-label="Saved delivery address"
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) setAddress(e.target.value);
-                    }}
-                  >
-                    <option value="">Choose a saved address</option>
-                    {query.data.addresses.map((row) => (
-                      <option
-                        key={row.id}
-                        value={`${row.addressLine}, ${row.city}`}
-                      >
-                        {row.label} · {row.addressLine}, {row.city}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <Field label="Delivery address">
-                <textarea
-                  required
-                  maxLength={255}
-                  placeholder="Street, building and city"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  rows={2}
-                />
-              </Field>
-              <div className="cart-totals">
-                <div>
-                  <span>Subtotal</span>
-                  <span>{money(total)}</span>
-                </div>
-                <div className="total-row">
-                  <strong>Total</strong>
-                  <strong>{money(total)}</strong>
-                </div>
-              </div>
-              {invalidCart && (
-                <p className="error-notice">
-                  Some quantities are no longer available. Adjust or remove
-                  those items.
-                </p>
-              )}
-              {state?.open === false && (
-                <p className="waiting-note">
-                  {state.detail}. Ordering follows the restaurant’s published
-                  hours.
-                </p>
-              )}
-              <button
-                className="button primary full-width"
-                disabled={
-                  busy ||
-                  placed ||
-                  !lines.length ||
-                  invalidCart ||
-                  !address.trim() ||
-                  !query.data?.restaurant.active ||
-                  state?.open === false
-                }
-              >
-                {busy ? "Placing order…" : "Place order"}
-                <Icon name="arrow" size={17} />
-              </button>
-              <p className="checkout-note">
-                Payment is handled automatically.
-                <br />
-                No card details needed for this demo.
-              </p>
+        <div className="order-workspace">
+          <div className="menu-area"><div className="night-menu-head"><div><span className="eyebrow">CHOOSE YOUR CRAVING</span><h2>What's cooking?<sup>{menu.length.toString().padStart(2,"0")}</sup></h2></div><label className="search-field"><Icon name="search" size={17}/><input aria-label="Search menu" placeholder="FIND SOMETHING GOOD" value={search} onChange={e=>setSearch(e.target.value)}/></label></div>
+          <div className="night-filter-bar"><button className={section==="all" ? "selected" : ""} onClick={()=>setSection("all")}>01 / ALL DISHES</button><button className={section==="available" ? "selected" : ""} onClick={()=>setSection("available")}>02 / AVAILABLE NOW</button><span>FRESH FROM THE KITCHEN ↗</span></div>
+          {!visible.length ? <Empty title={search ? "No matching dishes" : "Nothing's on the menu yet"}>{search ? "Try a different search." : "This kitchen is preparing its lineup."}</Empty> :
+          <div className="night-menu-list">{visible.map((item,index)=>{
+            const unavailable = !item.available || item.stockQuantity <= 0;
+            return <article className={`night-menu-item ${unavailable ? "unavailable" : ""}`} key={item.id}>
+              <div className="menu-item-photo"><FoodArt name={item.name}/><span className="menu-item-index">{String(index+1).padStart(2,"0")}</span></div>
+              <div className="menu-item-main"><span className="menu-item-category">NIGHTSHIFT SELECTS / {unavailable ? "SOLD OUT" : `${item.stockQuantity} LEFT`}</span><h3>{item.name}</h3><p>{item.description || "Cooked fresh for your next craving."}</p><div className="menu-item-foot"><strong>{money(item.price)}</strong>{cart[item.id] ? <div className="quantity-control"><button aria-label={`Remove one ${item.name}`} onClick={()=>quantity(item,-1)}>−</button><span>{cart[item.id]}</span><button aria-label={`Add one ${item.name}`} disabled={unavailable || cart[item.id]>=item.stockQuantity} onClick={()=>quantity(item,1)}>+</button></div> : <button className="night-add" aria-label={`Add ${item.name} to order`} disabled={unavailable || busy} onClick={()=>quantity(item,1)}>{unavailable ? "UNAVAILABLE" : "ADD TO BAG"} <span>↗</span></button>}</div></div>
+            </article>;
+          })}</div>}
+          </div>
+          <aside className="night-cart"><div className="night-cart-head"><div><span className="eyebrow">YOUR FOOD, YOUR RULES</span><h2>THE BAG <span>({lines.reduce((n,item)=>n+item.quantity,0)})</span></h2></div><span className="cart-asterisk">✳</span></div>
+            {!lines.length ? <div className="night-cart-empty"><span>✳</span><h3>Nothing in here.<br/>Yet.</h3><p>Build your perfect order from the menu on the left.</p></div> : <div className="night-cart-lines">{lines.map(item=><div className="night-cart-line" key={item.id}><FoodArt name={item.name}/><div><strong>{item.name}</strong><span>{money(item.price)} · {item.quantity}×</span><div className="quantity-control"><button aria-label={`Decrease ${item.name}`} onClick={()=>quantity(item,-1)}>−</button><span>{item.quantity}</span><button aria-label={`Increase ${item.name}`} disabled={item.quantity>=item.stockQuantity || !item.available} onClick={()=>quantity(item,1)}>+</button></div><button className="text-button" aria-label={`Remove ${item.name} from order`} onClick={()=>setCart(current=>{const next={...current};delete next[item.id];return next;})}>REMOVE</button></div></div>)}</div>}
+            {lines.length>0 && <button className="clear-bag" onClick={()=>setCart({})}>CLEAR ENTIRE BAG ×</button>}
+            <form onSubmit={checkout} className="night-checkout"><div className="checkout-heading"><h3>DELIVERY DETAILS</h3><button type="button" onClick={()=>setAddressModal(true)}>+ SAVE ADDRESS</button></div>
+              {query.data?.addresses.length>0 && <Field label="Saved addresses"><select aria-label="Saved delivery address" value="" onChange={e=>{if(e.target.value)setAddress(e.target.value);}}><option value="">CHOOSE A SAVED ADDRESS</option>{query.data.addresses.map(row=><option key={row.id} value={`${row.addressLine}, ${row.city}`}>{row.label} · {row.addressLine}, {row.city}</option>)}</select></Field>}
+              <Field label="Your delivery address"><textarea required maxLength={255} placeholder="Street, building and city" rows={2} value={address} onChange={e=>setAddress(e.target.value)}/></Field>
+              <div className="night-totals"><div><span>SUBTOTAL</span><span>{money(total)}</span></div><div><strong>TOTAL DUE</strong><strong>{money(total)}</strong></div></div>
+              {invalidCart && <p className="error-notice">Some selected quantities aren't available. Please adjust your order.</p>}
+              {state?.open===false && <p className="waiting-note">{state.detail}. Ordering follows published hours.</p>}
+              <button className="button primary night-place-order" disabled={busy || placed || !lines.length || invalidCart || !address.trim() || !query.data?.restaurant.active || state?.open===false}>{busy ? "PLACING ORDER…" : "CONFIRM MY ORDER"}<span>↗</span></button><p className="checkout-note">Automatic demo payment. No card details required.</p>
             </form>
           </aside>
         </div>
       </DataState>
-      {addressModal && (
-        <AddressForm
-          customerId={customerId}
-          onClose={() => setAddressModal(false)}
-          onSaved={(saved) => {
-            setAddress(`${saved.addressLine}, ${saved.city}`);
-            query.refresh();
-            notify("Address saved.");
-          }}
-        />
-      )}
-    </>
+      {addressModal && <AddressForm customerId={customerId} onClose={()=>setAddressModal(false)} onSaved={saved=>{setAddress(`${saved.addressLine}, ${saved.city}`);query.refresh();notify("Address saved.");}}/>}
+    </div>
   );
 }

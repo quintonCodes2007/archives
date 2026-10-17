@@ -3,133 +3,45 @@ import { useAuth } from "../context/AuthContext";
 import Icon from "../components/Icon";
 
 const adminLinks = [
-  ["/admin", "grid", "Overview"],
-  ["/admin/restaurants", "store", "Restaurants"],
-  ["/admin/drivers", "users", "Drivers"],
-  ["/admin/orders", "bag", "Orders"],
-  ["/admin/reports", "chart", "Reports"],
+  ["/admin", "grid", "Command"], ["/admin/restaurants", "store", "Restaurants"],
+  ["/admin/drivers", "users", "Drivers"], ["/admin/orders", "bag", "All orders"],
+  ["/admin/reports", "chart", "Analytics"],
 ];
+const customerLinks = [["/restaurants", "store", "Discover"], ["/customer/orders", "bag", "Orders"]];
+const operationsLinks = [["/kitchen", "chef", "Kitchens"], ["/delivery", "truck", "Dispatch"]];
 export default function AppLayout({ mode = "customer" }) {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
-  const links =
-    mode === "admin"
-      ? adminLinks
-      : mode === "customer"
-        ? [
-            ["/restaurants", "store", "Restaurants"],
-            ["/customer/orders", "bag", "My orders"],
-          ]
-        : [
-            ["/kitchen", "chef", "Kitchen"],
-            ["/delivery", "truck", "Deliveries"],
-          ];
-  const name =
-    mode === "admin"
-      ? "Demo admin"
-      : mode === "customer"
-        ? session?.customer.fullName
-        : "Operations team";
+  const links = mode === "admin" ? adminLinks : mode === "customer" ? customerLinks : operationsLinks;
+  const name = mode === "admin" ? "Administrator" : mode === "customer" ? session?.customer?.fullName : "Operations team";
+  const home = mode === "admin" ? "/admin" : mode === "customer" ? "/restaurants" : "/kitchen";
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <Link
-          className="brand"
-          to={
-            mode === "admin"
-              ? "/admin"
-              : mode === "customer"
-                ? "/restaurants"
-                : "/kitchen"
-          }
-        >
-          <span className="brand-mark">
-            <Icon name="leaf" size={23} />
-          </span>
-          food<span>lane</span>
-          <i />
-        </Link>
-        <div className="nav-label">
-          {mode === "admin"
-            ? "MANAGEMENT"
-            : mode === "customer"
-              ? "YOUR EVERYDAY FAVOURITES"
-              : "WORKSPACE"}
-        </div>
-        <nav aria-label="Main navigation">
+    <div className={`noir-shell app-shell--${mode}`}>
+      <aside className="command-rail" aria-label="Application navigation">
+        <Link className="rail-logo" to={home} aria-label="Nightshift home"><span>N</span><b>.</b></Link>
+        <div className="rail-divider" />
+        <nav className="rail-navigation" aria-label="Main navigation">
           {links.map(([to, icon, label]) => (
-            <NavLink key={to} to={to} end={to === "/admin"}>
-              <Icon name={icon} />
-              <span>{label}</span>
+            <NavLink key={to} to={to} end={to === "/admin"} title={label}>
+              <Icon name={icon} size={21}/><span>{label}</span>
             </NavLink>
           ))}
         </nav>
-        <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            <Icon name={mode === "customer" ? "bag" : "chef"} size={28} />
-            <strong>
-              {mode === "customer"
-                ? "Good food, closer."
-                : "A smoother service."}
-            </strong>
-            <p>
-              {mode === "customer"
-                ? "Your next favourite meal is just around the corner."
-                : "From the kitchen to the doorstep, keep things moving."}
-            </p>
-          </div>
-          {mode !== "customer" && (
-            <div className="ops-links">
-              <Link to="/kitchen">
-                Kitchen workspace <Icon name="arrow" size={15} />
-              </Link>
-              <Link to="/delivery">
-                Delivery workspace <Icon name="arrow" size={15} />
-              </Link>
-            </div>
-          )}
-          <button
-            className="logout-button"
-            onClick={() => {
-              logout();
-              navigate("/");
-            }}
-          >
-            <Icon name="logout" />
-            {session ? "Log out" : "Back to sign in"}
-          </button>
+        <div className="rail-spacer" />
+        <div className="rail-bottom">
+          {mode !== "customer" && <Link to="/delivery" title="Delivery control"><Icon name="truck" size={20}/><span>Dispatch</span></Link>}
+          <button onClick={() => { logout(); navigate("/"); }} title={session ? "Sign out" : "Sign in"}><Icon name="logout" size={20}/><span>{session ? "Sign out" : "Sign in"}</span></button>
         </div>
       </aside>
-      <div className="main-shell">
-        <header className="topbar">
-          <span className="workspace-name">
-            {mode === "admin"
-              ? "Restaurant management"
-              : mode === "customer"
-                ? "A little local. A lot delicious."
-                : "Foodlane operations"}
-          </span>
-          <div className="profile">
-            <span className="avatar">{name?.slice(0, 1)}</span>
-            <div>
-              <strong>{name}</strong>
-              <small>
-                {mode === "customer"
-                  ? "Customer"
-                  : mode === "admin"
-                    ? "Demo workspace"
-                    : "No sign-in required"}
-              </small>
-            </div>
-          </div>
+      <div className="noir-main">
+        <header className="noir-topbar">
+          <div className="topbar-location"><span className="signal-pulse"/> <span>NOW SERVING</span> <b>NAMIBIA</b></div>
+          <Link to={home} className="wordmark">NIGHTSHIFT<span> / </span>EATS<span className="wordmark-star">✳</span></Link>
+          <div className="topbar-user"><span className="topbar-greeting">{name || "Guest"}</span><span className="topbar-avatar">{(name || "N")[0].toUpperCase()}</span></div>
         </header>
-        <main className="page-content">
-          <Outlet />
-        </main>
-        <footer className="app-footer">
-          <span>Foodlane · Made for the way you eat.</span>
-          <span>DSA Assignment 2</span>
-        </footer>
+        <div className="section-ribbon"><span>{mode === "customer" ? "01 / THE MENU" : mode === "admin" ? "02 / CONTROL CENTRE" : "03 / SERVICE OPERATIONS"}</span><span>INDEPENDENT KITCHENS · BOLD FLAVOUR · MADE IN NAMIBIA</span><span className="ribbon-live">● LIVE PLATFORM</span></div>
+        <main className="noir-content page-content"><Outlet /></main>
+        <footer className="noir-footer"><span>NIGHTSHIFT EATS © 2026</span><span>DESIGNED FOR THE HUNGRY / POWERED BY LOCAL KITCHENS</span><span>DSA612S</span></footer>
       </div>
     </div>
   );

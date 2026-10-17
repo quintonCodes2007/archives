@@ -1,0 +1,13 @@
+# Paste this service under `services:` in the root docker-compose.yml.
+frontend:
+  build:
+    context: ./frontend
+  container_name: food_delivery_frontend
+  ports:
+    - "5173:80"
+  depends_on:
+    - customer-service
+    - restaurant-service
+    - order-service
+    - delivery-service
+    - admin-service

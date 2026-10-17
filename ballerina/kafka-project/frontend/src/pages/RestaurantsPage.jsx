@@ -94,165 +94,31 @@ export default function RestaurantsPage({ admin = false, kitchen = false }) {
       r.name.toLowerCase().includes(search.toLowerCase()),
   );
   return (
-    <>
-      <PageHeader
-        eyebrow={
-          kitchen
-            ? "KITCHEN WORKSPACE"
-            : admin
-              ? "YOUR RESTAURANTS"
-              : `HELLO, ${session?.customer?.fullName?.split(" ")[0]?.toUpperCase() || "FOODIE"}`
-        }
-        title={
-          kitchen
-            ? "Choose your kitchen"
-            : admin
-              ? "Manage restaurants"
-              : "What sounds good today?"
-        }
-        actions={
-          <>
-            <Live {...query} />
-            {admin && (
-              <button className="button primary" onClick={() => setModal(true)}>
-                <Icon name="plus" size={18} />
-                Add restaurant
-              </button>
-            )}
-          </>
-        }
-      >
-        {kitchen
-          ? "Open a restaurant’s live preparation queue. No sign-in needed."
-          : admin
-            ? "Menus, opening hours and orders, all in one place."
-            : "Freshly prepared favourites from your neighbourhood."}
-      </PageHeader>
-      {!admin && !kitchen && (
-        <div className="discovery-banner">
-          <div>
-            <span className="eyebrow">GOOD FOOD, GOOD MOOD</span>
-            <h2>
-              Your table is
-              <br />
-              wherever you are.
-            </h2>
-            <p>Pick a local kitchen. We’ll take it from there.</p>
-          </div>
-          <FoodArt kind="burger" />
-          <span className="banner-tag">
-            Made local.
-            <br />
-            Loved daily.
-          </span>
-        </div>
-      )}
-      <div className="section-toolbar">
-        <div>
-          <h2>{kitchen ? "Restaurant kitchens" : "Explore restaurants"}</h2>
-          <span className="muted">
-            {restaurants.length}{" "}
-            {restaurants.length === 1 ? "restaurant" : "restaurants"}
-          </span>
-        </div>
-        <label className="search-field">
-          <Icon name="search" size={18} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search restaurants"
-            placeholder="Find a restaurant…"
-          />
-        </label>
+    <div className="discovery-page">
+      {(!admin && !kitchen) && <section className="discover-hero">
+        <div className="hero-text"><span className="hero-count">N° 01 / CURATED LOCAL CRAVINGS</span><h1>GOOD FOOD.<br/><em>BAD HABITS.</em></h1><p>Skip the ordinary. Discover independent Namibian kitchens cooking up something worth staying in for.</p><a href="#restaurants" className="hero-cta">EXPLORE THE LINEUP <span>↗</span></a><div className="hero-ticker">HOT & FRESH <span>✳</span> MADE IN NAMIBIA <span>✳</span> YOUR NEXT OBSESSION</div></div>
+        <div className="hero-visual"><FoodArt kind="burgerAlt"/><div className="hero-sticker">100%<br/>LOCAL<br/><small>GOODNESS</small></div><span className="hero-photo-label">THE NIGHTSHIFT EDIT / 2026</span></div>
+      </section>}
+      {(admin || kitchen) && <div className="management-hero"><div><span className="eyebrow">{kitchen ? "KITCHEN OPERATIONS / 01" : "RESTAURANT MANAGEMENT / 02"}</span><h1>{kitchen ? "Choose your station." : "Your culinary empire."}</h1><p>{kitchen ? "Step inside a kitchen and take control of the live preparation queue." : "Build menus, manage inventory and run the restaurants that keep the city fed."}</p></div><div className="management-graphic">{kitchen ? "HOT / 01" : "HQ / 02"}<span>✳</span></div></div>}
+      <div className="directory-head" id="restaurants">
+        <div><span className="eyebrow">{kitchen ? "ACTIVE KITCHENS" : admin ? "MANAGED RESTAURANTS" : "THE NEIGHBOURHOOD EDIT"}</span><h2>{kitchen ? "Pick a kitchen" : admin ? "Your locations" : "The local lineup"}<sup>{restaurants.length.toString().padStart(2,"0")}</sup></h2></div>
+        <div className="directory-controls"><Live {...query}/><label className="search-field"><Icon name="search" size={18}/><input aria-label="Search restaurants" value={search} onChange={e=>setSearch(e.target.value)} placeholder="SEARCH KITCHENS"/></label>{admin && <button className="button primary" onClick={()=>setModal(true)}><Icon name="plus" size={17}/> NEW LOCATION</button>}</div>
       </div>
       <DataState query={query}>
-        {!restaurants.length ? (
-          <Empty
-            title={search ? "No restaurants found" : "No restaurants yet"}
-            icon="store"
-          >
-            {search
-              ? "Try another restaurant name."
-              : admin
-                ? "Add your first restaurant to get started."
-                : "Restaurants will appear here when they are added."}
-          </Empty>
-        ) : (
-          <div className="restaurant-grid">
-            {restaurants.map((restaurant, index) => {
-              const state = openingState(restaurant);
-              const path = kitchen
-                ? `/kitchen/${restaurant.id}`
-                : admin
-                  ? `/admin/restaurants/${restaurant.id}`
-                  : `/order/${restaurant.id}`;
-              return (
-                <article className="restaurant-card" key={restaurant.id}>
-                  <Link
-                    to={path}
-                    className="restaurant-cover"
-                    aria-label={`View ${restaurant.name}`}
-                  >
-                    <FoodArt
-                      name={restaurant.name}
-                      kind={
-                        /pizza/i.test(restaurant.name)
-                          ? "pizza"
-                          : /chicken/i.test(restaurant.name)
-                            ? "chicken"
-                            : index % 3 === 2
-                              ? "wrap"
-                              : "burger"
-                      }
-                    />
-                    <span className="cover-badge">
-                      {restaurant.menuCount} menu items
-                    </span>
-                  </Link>
-                  <div className="restaurant-card-body">
-                    <div className="row-between">
-                      <h3>{restaurant.name}</h3>
-                      <Badge
-                        status={
-                          state.open
-                            ? "AVAILABLE"
-                            : state.open === false
-                              ? "OFFLINE"
-                              : "CREATED"
-                        }
-                      >
-                        {state.label}
-                      </Badge>
-                    </div>
-                    <p className="icon-text">
-                      <Icon name="pin" size={15} />
-                      {restaurant.address}
-                    </p>
-                    <p className="icon-text">
-                      <Icon name="clock" size={15} />
-                      {state.detail}
-                    </p>
-                    <Link className="button secondary full-width" to={path}>
-                      {kitchen
-                        ? "Open kitchen"
-                        : admin
-                          ? "Manage restaurant"
-                          : "Explore menu"}
-                      <Icon name="arrow" size={17} />
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+        {!restaurants.length ? <Empty title={search ? "Nothing found" : "The lineup is empty"} icon="store">{search ? "Try another name." : admin ? "Add a restaurant to get started." : "Restaurants will appear once they're available."}</Empty> :
+        <div className="night-restaurant-list">{restaurants.map((restaurant,index)=>{
+          const state = openingState(restaurant);
+          const path = kitchen ? `/kitchen/${restaurant.id}` : admin ? `/admin/restaurants/${restaurant.id}` : `/order/${restaurant.id}`;
+          const kind = /pizza/i.test(restaurant.name) ? "pizza" : /chicken/i.test(restaurant.name) ? "chicken" : index%3===1 ? "burgerAlt" : index%3===2 ? "wrap" : "burger";
+          return <Link to={path} className="night-restaurant" key={restaurant.id}>
+            <div className="restaurant-image"><FoodArt kind={kind} name={restaurant.name}/><span>FEATURED / {String(index+1).padStart(2,"0")}</span></div>
+            <div className="restaurant-body"><div className="restaurant-index">{String(index+1).padStart(2,"0")} / THE LINEUP</div><div className="restaurant-title-row"><h3>{restaurant.name}</h3><span className="restaurant-go">↗</span></div><p><Icon name="pin" size={15}/>{restaurant.address}</p><div className="restaurant-meta"><span><Icon name="clock" size={15}/>{state.detail}</span><span>{restaurant.menuCount} MENU ITEMS</span></div></div>
+            <div className="restaurant-visit"><Badge status={state.open ? "AVAILABLE" : state.open===false ? "OFFLINE" : "CREATED"}>{state.label}</Badge><strong>{kitchen ? "OPEN STATION" : admin ? "EDIT KITCHEN" : "SEE THE MENU"} <span>↗</span></strong></div>
+          </Link>;
+        })}</div>}
       </DataState>
-      {modal && (
-        <RestaurantForm
-          onClose={() => setModal(false)}
-          onSaved={query.refresh}
-        />
-      )}
-    </>
+      <div className="directory-end">YOU'VE REACHED THE END OF THE GOOD STUFF <span>✳</span></div>
+      {modal && <RestaurantForm onClose={()=>setModal(false)} onSaved={query.refresh}/>}
+    </div>
   );
 }

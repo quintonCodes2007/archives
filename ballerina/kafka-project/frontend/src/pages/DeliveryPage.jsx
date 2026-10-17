@@ -52,172 +52,25 @@ export default function DeliveryPage() {
     }
   }
   return (
-    <>
-      <PageHeader
-        eyebrow="DELIVERY WORKSPACE"
-        title="Good food. On the move."
-        actions={<Live {...query} />}
-      >
-        Your delivery board, from pickup to doorstep. Drivers are assigned
-        automatically.
-      </PageHeader>
+    <div className="dispatch-page">
+      <div className="dispatch-hero"><div><span className="eyebrow">FIELD OPERATIONS / NAMIBIA</span><h1>Every order.<br/><em>In motion.</em></h1><p>From the restaurant pass to the customer's door. Manage pickups, departures and deliveries in one command centre.</p></div><div className="dispatch-clock"><span>OPERATIONS ACTIVE</span><strong>24<span>/</span>7</strong><Live {...query}/></div></div>
       <DataState query={query}>
-        <div className="stats-grid">
-          <Stat
-            label="Waiting for a driver"
-            value={waiting.length}
-            icon="clock"
-          />
-          <Stat
-            label="Active deliveries"
-            value={active.length}
-            icon="truck"
-            accent
-          />
-          <Stat
-            label="Available drivers"
-            value={
-              (query.data?.drivers || []).filter(
-                (d) => d.status === "AVAILABLE",
-              ).length
-            }
-            icon="users"
-          />
-          <Stat
-            label="Completed deliveries"
-            value={completed.filter((d) => d.status === "DELIVERED").length}
-            icon="check"
-          />
+        <div className="dispatch-strip stats-grid">
+          <Stat label="AWAITING ASSIGNMENT" value={waiting.length} icon="clock"/>
+          <Stat label="ON THE ROAD" value={active.length} icon="truck" accent/>
+          <Stat label="DRIVERS AVAILABLE" value={(query.data?.drivers||[]).filter(d=>d.status==="AVAILABLE").length} icon="users"/>
+          <Stat label="SUCCESSFULLY DELIVERED" value={completed.filter(d=>d.status==="DELIVERED").length} icon="check"/>
         </div>
-        <DeliveryMap delivery={selectedDelivery} />
-        <div className="section-toolbar">
-          <h2>Delivery board</h2>
-          <div className="pill-tabs">
-            {[
-              ["active", "Active", active.length],
-              ["waiting", "Waiting", waiting.length],
-              ["completed", "History", completed.length],
-            ].map(([value, label, count]) => (
-              <button
-                key={value}
-                className={tab === value ? "selected" : ""}
-                onClick={() => setTab(value)}
-              >
-                {label}
-                <span>{count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        {tab === "waiting" ? (
-          !waiting.length ? (
-            <Empty title="No deliveries are waiting for a driver." icon="truck">
-              New ready orders appear here if all drivers are busy.
-            </Empty>
-          ) : (
-            <div className="delivery-grid">
-              {waiting.map((row) => (
-                <article className="panel delivery-card" key={row.orderId}>
-                  <div className="row-between">
-                    <strong>Order #{row.orderId}</strong>
-                    <Badge status="WAITING" />
-                  </div>
-                  <h3>{row.restaurantName}</h3>
-                  <p className="icon-text">
-                    <Icon name="pin" size={16} />
-                    {row.deliveryAddress}
-                  </p>
-                  <p className="muted">
-                    {row.customerName} · {row.itemCount} items ·{" "}
-                    {money(row.totalAmount)}
-                  </p>
-                  <div className="waiting-note">
-                    The backend will assign the next available driver.
-                  </div>
-                </article>
-              ))}
-            </div>
-          )
-        ) : (tab === "active" ? active : completed).length === 0 ? (
-          <Empty
-            title={
-              tab === "active"
-                ? "No active deliveries right now."
-                : "No completed deliveries yet."
-            }
-            icon="truck"
-          >
-            Your deliveries will appear here automatically.
-          </Empty>
-        ) : (
-          <div className="delivery-grid">
-            {(tab === "active" ? active : completed).map((row) => (
-              <article
-                className={`panel delivery-card ${selectedDelivery?.id === row.id ? "selected-delivery" : ""}`}
-                key={row.id}
-              >
-                <div className="row-between">
-                  <strong>Order #{row.orderId}</strong>
-                  <Badge status={row.status} />
-                </div>
-                <h3>{row.restaurantName}</h3>
-                <p className="icon-text">
-                  <Icon name="pin" size={16} />
-                  {row.deliveryAddress}
-                </p>
-                <p className="muted">
-                  {row.customerName} · {row.itemCount} items ·{" "}
-                  {money(row.totalAmount)}
-                </p>
-                <div className="driver-assignment">
-                  <span className="avatar">{row.driverName.slice(0, 1)}</span>
-                  <div>
-                    <strong>{row.driverName}</strong>
-                    <small>Assigned driver</small>
-                  </div>
-                </div>
-                <div className="delivery-actions">
-                  <button
-                    className="button secondary"
-                    onClick={() => setSelected(row.id)}
-                  >
-                    View route
-                  </button>
-                  {actions[row.status] && (
-                    <button
-                      className="button primary"
-                      disabled={busy[row.id]}
-                      onClick={() => advance(row)}
-                    >
-                      {busy[row.id] ? "Updating…" : actions[row.status][0]}
-                      <Icon name="arrow" size={16} />
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-        <div className="section-toolbar">
-          <h2>Driver availability</h2>
-          <span className="muted">All restaurants · one shared team</span>
-        </div>
-        {!query.data?.drivers.length ? (
-          <Empty title="No drivers added yet" icon="users">
-            An admin can add drivers to start deliveries.
-          </Empty>
-        ) : (
-          <div className="driver-roster">
-            {query.data.drivers.map((driver) => (
-              <div className="panel driver-roster-card" key={driver.id}>
-                <span className="avatar">{driver.fullName.slice(0, 1)}</span>
-                <strong>{driver.fullName}</strong>
-                <Badge status={driver.status} />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="dispatch-map-board"><DeliveryMap delivery={selectedDelivery}/><div className="dispatch-side"><div className="dispatch-side-head"><span className="eyebrow">LIVE QUEUE / {String(active.length).padStart(2,'0')}</span><h2>On the radar.</h2><p>Select a job to inspect its approximate destination.</p></div>
+          <div className="dispatch-side-scroll">{!active.length ? <Empty title="The roads are clear" icon="truck">Active assignments appear here when orders are dispatched.</Empty> : active.map(row=><button className={`radar-job ${selectedDelivery?.id===row.id ? "selected" : ""}`} key={row.id} onClick={()=>setSelected(row.id)}><span className="radar-job-top">JOB #{row.orderId}<Badge status={row.status}/></span><strong>{row.restaurantName}</strong><small>{row.deliveryAddress}</small><span className="radar-job-bottom">{row.driverName} <span>EXPLORE ↗</span></span></button>)}</div>
+        </div></div>
+        <div className="dispatch-board-title"><div><span className="eyebrow">DELIVERY CONTROL / LIVE STATUS</span><h2>The dispatch board.</h2></div><div className="pill-tabs">{[["active","ACTIVE",active.length],["waiting","WAITING",waiting.length],["completed","HISTORY",completed.length]].map(([value,label,count])=><button key={value} className={tab===value ? "selected" : ""} onClick={()=>setTab(value)}>{label} <span>{count}</span></button>)}</div></div>
+        {tab === "waiting" ? (!waiting.length ? <Empty title="No orders waiting" icon="truck">Ready orders waiting for a driver will show here automatically.</Empty> : <div className="dispatch-cards">{waiting.map(row=><article key={row.orderId} className="dispatch-ticket"><div className="ticket-top"><strong>#{row.orderId}</strong><Badge status="WAITING"/></div><h3>{row.restaurantName}</h3><p><Icon name="pin" size={15}/>{row.deliveryAddress}</p><p>{row.customerName} · {row.itemCount} items · {money(row.totalAmount)}</p><div className="waiting-note">Automatic driver assignment pending</div></article>)}</div>) :
+        (tab === "active" ? active : completed).length===0 ? <Empty title={tab==="active" ? "No active deliveries" : "No completed deliveries"} icon="truck">New delivery activity will appear here.</Empty> :
+        <div className="dispatch-cards">{(tab==="active"?active:completed).map(row=><article className={`dispatch-ticket ${selectedDelivery?.id===row.id ? "selected" : ""}`} key={row.id}><div className="ticket-top"><strong>ORDER #{row.orderId}</strong><Badge status={row.status}/></div><h3>{row.restaurantName}</h3><p><Icon name="pin" size={15}/>{row.deliveryAddress}</p><p>{row.customerName} · {row.itemCount} items · {money(row.totalAmount)}</p><div className="ticket-driver"><span>{row.driverName.slice(0,1)}</span><div><strong>{row.driverName}</strong><small>ASSIGNED DRIVER</small></div></div><div className="ticket-actions"><button className="button secondary" onClick={()=>{setSelected(row.id);document.querySelector('.geo-panel')?.scrollIntoView({behavior:'smooth',block:'center'});}}>MAP VIEW ↗</button>{actions[row.status] && <button className="button primary" disabled={busy[row.id]} onClick={()=>advance(row)}>{busy[row.id] ? "UPDATING" : actions[row.status][0].toUpperCase()} ↗</button>}</div></article>)}</div>}
+        <div className="dispatch-board-title"><div><span className="eyebrow">YOUR PEOPLE</span><h2>Driver roster.</h2></div><span className="muted">SHARED ACROSS ALL RESTAURANTS</span></div>
+        {!query.data?.drivers.length ? <Empty title="No drivers registered" icon="users">An administrator can add drivers from the Driver management page.</Empty> : <div className="driver-roster">{query.data.drivers.map(driver=><div key={driver.id} className="driver-roster-card"><span className="avatar">{driver.fullName.slice(0,1)}</span><strong>{driver.fullName}</strong><Badge status={driver.status}/></div>)}</div>}
       </DataState>
-    </>
+    </div>
   );
 }

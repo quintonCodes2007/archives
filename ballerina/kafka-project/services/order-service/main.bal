@@ -91,20 +91,7 @@ type OrderCreatedEvent readonly & record {|
 type DbCheckResult record {|
     int result;
 |};
-
-function createOrderTransactional(CreateOrderRequest orderRequest)
-        returns OrderResponse|error {
-
-    int orderId = 0;
-    decimal totalAmount = 0.0d;
-
-    transaction {
-
-        foreach OrderItemRequest item in orderRequest.items {
-
-            MenuItemData|error menuResult = dbClient->queryRow(
-                `SELECT
-                    id,
+                   id,
                     price,
                     stock_quantity AS stockQuantity,
                     available
